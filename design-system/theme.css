@@ -1,0 +1,190 @@
+:root {
+  --font-sans: "Montserrat", "Segoe UI", sans-serif;
+  --font-weight-regular: 400;
+  --font-weight-semibold: 600;
+  --font-weight-extrabold: 800;
+  --letter-spacing-tight: -1px;
+
+  --color-ink-950: #042f2e;
+  --color-ink-900: #065f46;
+  --color-brand-500: #10b981;
+  --color-brand-300: #34d399;
+  --color-mist-50: #ecfeff;
+
+  --color-surface: linear-gradient(180deg, #042f2e 0%, #065f46 100%);
+  --color-surface-elevated: rgba(255, 255, 255, 0.04);
+  --color-border-hairline: rgba(255, 255, 255, 0.08);
+  --color-text-primary: #ecfeff;
+  --color-text-secondary: rgba(236, 254, 255, 0.74);
+  --color-accent: #10b981;
+  --color-accent-soft: rgba(52, 211, 153, 0.16);
+  --color-shadow: rgba(4, 47, 46, 0.34);
+
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.5rem;
+  --space-6: 2rem;
+  --space-7: 3rem;
+
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 28px;
+
+  --transition-fast: 180ms ease;
+  --transition-base: 280ms ease;
+  --transition-slow: 420ms ease;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  font-family: var(--font-sans);
+  letter-spacing: var(--letter-spacing-tight);
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(52, 211, 153, 0.24), transparent 30%),
+    radial-gradient(circle at bottom right, rgba(16, 185, 129, 0.2), transparent 32%),
+    var(--color-surface);
+  color: var(--color-text-primary);
+}
+
+button,
+input,
+textarea,
+select {
+  font: inherit;
+  letter-spacing: inherit;
+}
+
+.ds-shell {
+  width: min(1120px, calc(100vw - 2rem));
+  margin: 0 auto;
+  padding: var(--space-7) 0;
+}
+
+.ds-card {
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0.04));
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-md);
+  box-shadow: 0 24px 80px -48px var(--color-shadow);
+  backdrop-filter: blur(16px);
+}
+
+.ds-heading-xl,
+.ds-heading-lg,
+.ds-heading-md {
+  margin: 0;
+  line-height: 0.96;
+}
+
+.ds-heading-xl {
+  font-size: clamp(2.75rem, 6vw, 5.5rem);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.ds-heading-lg {
+  font-size: clamp(2rem, 4vw, 3.5rem);
+  font-weight: var(--font-weight-extrabold);
+}
+
+.ds-heading-md {
+  font-size: clamp(1.25rem, 2vw, 1.8rem);
+  font-weight: var(--font-weight-semibold);
+}
+
+.ds-copy {
+  margin: 0;
+  color: var(--color-text-secondary);
+  font-size: 1rem;
+  line-height: 1.6;
+}
+
+.ds-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  min-height: 48px;
+  padding: 0.875rem 1.25rem;
+  border: 1px solid var(--color-border-hairline);
+  border-radius: 999px;
+  background: linear-gradient(135deg, var(--color-brand-500), var(--color-brand-300));
+  color: var(--color-ink-950);
+  font-weight: var(--font-weight-extrabold);
+  cursor: pointer;
+  transition:
+    transform var(--transition-fast),
+    box-shadow var(--transition-fast),
+    opacity var(--transition-fast);
+  box-shadow: 0 18px 38px -24px rgba(16, 185, 129, 0.95);
+}
+
+.ds-button:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 24px 44px -24px rgba(16, 185, 129, 0.9);
+}
+
+.ds-button:active {
+  transform: translateY(0);
+}
+
+.ds-button--ghost {
+  background: rgba(255, 255, 255, 0.03);
+  color: var(--color-text-primary);
+  box-shadow: none;
+}
+
+.ds-input,
+.ds-textarea {
+  width: 100%;
+  border: 1px solid var(--color-border-hairline);
+  border-radius: var(--radius-sm);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--color-text-primary);
+  padding: 0.95rem 1rem;
+  outline: none;
+  transition:
+    border-color var(--transition-fast),
+    background var(--transition-fast),
+    box-shadow var(--transition-fast);
+}
+
+.ds-input::placeholder,
+.ds-textarea::placeholder {
+  color: rgba(236, 254, 255, 0.4);
+}
+
+.ds-input:focus,
+.ds-textarea:focus {
+  border-color: rgba(52, 211, 153, 0.6);
+  background: rgba(255, 255, 255, 0.06);
+  box-shadow: 0 0 0 4px rgba(52, 211, 153, 0.12);
+}
+
+.ds-stack {
+  display: grid;
+  gap: var(--space-4);
+}
+
+.ds-inline {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-3);
+}
+
+@media (max-width: 640px) {
+  .ds-shell {
+    width: min(100vw - 1.25rem, 100%);
+    padding: var(--space-6) 0;
+  }
+}

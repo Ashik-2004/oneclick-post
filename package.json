@@ -1,0 +1,16 @@
+{
+  "name": "social-one-touch-free",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Free local LinkedIn and X posting tool using Playwright automation.",
+  "main": "server/app.js",
+  "scripts": {
+    "start": "node server/app.js",
+    "dev": "node --watch server/app.js",
+    "postinstall": "playwright install chromium"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "playwright": "^1.52.0"
+  }
+}

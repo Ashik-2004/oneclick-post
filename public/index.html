@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>One-Touch Social Poster</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/design-system/theme.css" />
+    <link rel="stylesheet" href="/public.css" />
+  </head>
+  <body>
+    <main class="ds-shell page-shell">
+      <section class="hero-panel ds-card">
+        <div class="hero-copy ds-stack">
+          <span class="eyebrow">One-touch social writer</span>
+          <h1 class="ds-heading-xl">Type one topic. Get X and LinkedIn posts automatically.</h1>
+          <p class="ds-copy hero-text">
+            Enter a topic or paste content. The app creates platform-specific text automatically, then opens X and LinkedIn with one main button.
+          </p>
+          <div class="hero-actions ds-inline">
+            <button id="quickOpenButton" class="ds-button" type="button">Generate and Open</button>
+            <button id="saveDraftButton" class="ds-button ds-button--ghost" type="button">Save draft</button>
+            <button id="refreshDraftsButton" class="ds-button ds-button--ghost" type="button">Refresh drafts</button>
+          </div>
+          <div class="hero-badges">
+            <span class="badge">Auto platform drafts</span>
+            <span class="badge">One main button</span>
+            <span class="badge">Clipboard support for LinkedIn</span>
+          </div>
+        </div>
+        <aside class="status-panel ds-card ds-stack">
+          <div>
+            <p class="status-label">System status</p>
+            <p id="statusMessage" class="status-value">Ready. Type a topic and the drafts will appear automatically.</p>
+          </div>
+          <div class="status-grid">
+            <div>
+              <span class="metric-label">Mode</span>
+              <strong id="modeValue">Auto</strong>
+            </div>
+            <div>
+              <span class="metric-label">Tone</span>
+              <strong id="toneValue">Professional</strong>
+            </div>
+            <div>
+              <span class="metric-label">Drafts</span>
+              <strong id="draftCount">0</strong>
+            </div>
+            <div>
+              <span class="metric-label">X limit</span>
+              <strong id="xCount">0 / 280</strong>
+            </div>
+          </div>
+          <div class="workflow-list">
+            <div class="workflow-item"><span>1</span> Type topic or paste content</div>
+            <div class="workflow-item"><span>2</span> App generates both versions automatically</div>
+            <div class="workflow-item"><span>3</span> Click Generate and Open</div>
+          </div>
+        </aside>
+      </section>
+
+      <section class="top-grid">
+        <article class="composer-panel ds-card ds-stack">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Input</p>
+              <h2 class="ds-heading-md">Enter once</h2>
+            </div>
+          </div>
+
+          <div class="api-grid">
+            <div class="ds-stack">
+              <label class="field-label" for="apiKeyInput">Groq API key</label>
+              <input id="apiKeyInput" class="ds-input" type="password" placeholder="Optional: better AI generation" />
+            </div>
+            <div class="ds-stack">
+              <label class="field-label" for="modelInput">Groq model</label>
+              <input id="modelInput" class="ds-input" type="text" value="llama-3.3-70b-versatile" />
+            </div>
+          </div>
+          <p class="helper-copy">If no API key is added, the app still generates posts locally.</p>
+
+          <div class="tone-row">
+            <button class="tone-chip is-active" data-tone="professional" type="button">Professional</button>
+            <button class="tone-chip" data-tone="bold" type="button">Bold</button>
+            <button class="tone-chip" data-tone="educational" type="button">Educational</button>
+          </div>
+
+          <label class="field-label" for="topicInput">Topic</label>
+          <input id="topicInput" class="ds-input" type="text" placeholder="Example: AI tools for small business marketing" />
+
+          <label class="field-label" for="contentInput">Full content</label>
+          <textarea id="contentInput" class="ds-textarea content-box" placeholder="Optional: paste full content and the app will adapt it for X and LinkedIn."></textarea>
+
+          <div class="insight-card">
+            <p class="field-label">Suggested hooks</p>
+            <ul id="hooksList" class="hook-list">
+              <li>Type a topic to generate platform-ready hooks.</li>
+            </ul>
+          </div>
+        </article>
+
+        <article class="preview-panel ds-card ds-stack">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Auto drafts</p>
+              <h2 class="ds-heading-md">Platform-specific text</h2>
+            </div>
+            <button id="copyLinkedInButton" class="ds-button ds-button--ghost" type="button">Copy LinkedIn</button>
+          </div>
+
+          <div class="preview-card">
+            <div class="preview-header">
+              <span class="network-pill network-pill-x">X</span>
+              <span id="xCounterInline" class="char-count">0 / 280</span>
+            </div>
+            <textarea id="xPreview" class="ds-textarea preview-box" placeholder="X text appears here automatically."></textarea>
+          </div>
+
+          <div class="preview-card">
+            <div class="preview-header">
+              <span class="network-pill network-pill-linkedin">LinkedIn</span>
+            </div>
+            <textarea id="linkedinPreview" class="ds-textarea preview-box preview-box-large" placeholder="LinkedIn text appears here automatically."></textarea>
+          </div>
+        </article>
+      </section>
+
+      <section class="bottom-grid">
+        <article class="drafts-panel ds-card ds-stack">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Draft library</p>
+              <h2 class="ds-heading-md">Saved drafts</h2>
+            </div>
+          </div>
+          <div id="draftsList" class="draft-list">
+            <p class="empty-state">No saved drafts yet.</p>
+          </div>
+        </article>
+
+        <article class="guide-panel ds-card ds-stack">
+          <div class="panel-header">
+            <div>
+              <p class="panel-kicker">Quick use</p>
+              <h2 class="ds-heading-md">Simple workflow</h2>
+            </div>
+          </div>
+          <div class="guide-grid">
+            <div class="guide-card">
+              <strong>Automatic drafting</strong>
+              <p class="ds-copy">Typing a topic refreshes both X and LinkedIn drafts automatically after a short pause.</p>
+            </div>
+            <div class="guide-card">
+              <strong>Platform-specific text</strong>
+              <p class="ds-copy">X stays short. LinkedIn stays more detailed and professional.</p>
+            </div>
+            <div class="guide-card">
+              <strong>One main action</strong>
+              <p class="ds-copy">Generate and Open fills X in a new tab and copies LinkedIn text for fast paste-and-post.</p>
+            </div>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" aria-live="polite"></div>
+    <script src="/app.js"></script>
+  </body>
+</html>
