@@ -20,7 +20,7 @@ async function waitForAny(page, selectors, timeout = 15000) {
     try {
       const handle = await page.waitForSelector(selector, { timeout });
       return { handle, selector };
-    } catch (error) {
+    } catch (_error) {
       continue;
     }
   }
@@ -43,7 +43,7 @@ async function fillComposer(page, selectors, text) {
 
   await handle.click();
   await page.keyboard.press(process.platform === "darwin" ? "Meta+A" : "Control+A");
-  await page.keyboard.type(text, { delay: 6 });
+  await page.keyboard.type(text, { delay: 5 });
 }
 
 async function ensureLoggedIn(page, url, loggedInSelectors, loginSelectors, platformName) {
@@ -68,12 +68,12 @@ async function openSessions() {
   const context = await launchContext();
   const xPage = await firstPage(context);
   await xPage.goto("https://x.com/home", { waitUntil: "domcontentloaded" });
-  const linkedinPage = await context.newPage();
+  const linkedinPage = context.pages()[1] || (await context.newPage());
   await linkedinPage.goto("https://www.linkedin.com/feed/", { waitUntil: "domcontentloaded" });
   return context;
 }
 
-async function postToX(page, text) {
+async function prepareXPage(page, text) {
   await ensureLoggedIn(
     page,
     "https://x.com/compose/post",
@@ -83,10 +83,9 @@ async function postToX(page, text) {
   );
 
   await fillComposer(page, ["[data-testid='tweetTextarea_0']", "div[role='textbox'][data-testid='tweetTextarea_0']"], text);
-  await clickAny(page, ["[data-testid='tweetButtonInline']", "[data-testid='tweetButton']"], 20000);
 }
 
-async function postToLinkedIn(page, text) {
+async function prepareLinkedInPage(page, text) {
   await ensureLoggedIn(
     page,
     "https://www.linkedin.com/feed/",
@@ -96,34 +95,64 @@ async function postToLinkedIn(page, text) {
   );
 
   await clickAny(page, ["button[aria-label*='Start a post']", "div.share-box-feed-entry__trigger", "button.share-box-feed-entry__trigger"], 20000);
-  await fillComposer(
-    page,
-    ["div[role='textbox']", "div.ql-editor[contenteditable='true']"],
-    text
-  );
-  await clickAny(page, ["button[aria-label='Post']", "button.share-actions__primary-action"], 20000);
+  await fillComposer(page, ["div[role='textbox']", "div.ql-editor[contenteditable='true']"], text);
 }
 
-async function postEverywhere({ linkedinText, xText }) {
+async function prepareXOnly({ xText }) {
+  const context = await launchContext();
+
+  try {
+    const xPage = await firstPage(context);
+    await prepareXPage(xPage, xText);
+    return {
+      success: true,
+      message: "X is opened with the post box filled. Review it and press Post on X."
+    };
+  } catch (error) {
+    await context.close().catch(() => {});
+    throw error;
+  }
+}
+
+async function prepareLinkedInOnly({ linkedinText }) {
+  const context = await launchContext();
+
+  try {
+    const linkedinPage = await firstPage(context);
+    await prepareLinkedInPage(linkedinPage, linkedinText);
+    return {
+      success: true,
+      message: "LinkedIn is opened with the post box filled. Review it and press Post on LinkedIn."
+    };
+  } catch (error) {
+    await context.close().catch(() => {});
+    throw error;
+  }
+}
+
+async function prepareEverywhere({ linkedinText, xText }) {
   const context = await launchContext();
 
   try {
     const xPage = await firstPage(context);
     const linkedinPage = context.pages()[1] || (await context.newPage());
 
-    await postToX(xPage, xText);
-    await postToLinkedIn(linkedinPage, linkedinText);
+    await prepareXPage(xPage, xText);
+    await prepareLinkedInPage(linkedinPage, linkedinText);
 
     return {
       success: true,
-      message: "Posts were submitted to X and LinkedIn in your browser."
+      message: "X and LinkedIn are opened with both post boxes filled. Review them and press Post on each site."
     };
-  } finally {
-    await context.close();
+  } catch (error) {
+    await context.close().catch(() => {});
+    throw error;
   }
 }
 
 module.exports = {
   openSessions,
-  postEverywhere
+  prepareEverywhere,
+  prepareXOnly,
+  prepareLinkedInOnly
 };

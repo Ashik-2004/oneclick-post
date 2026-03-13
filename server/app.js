@@ -2,7 +2,7 @@ const path = require("path");
 const express = require("express");
 
 const { generatePosts, clampXText, cleanInput } = require("./generate");
-const { openSessions, postEverywhere } = require("./poster");
+const { openSessions, prepareEverywhere, prepareXOnly, prepareLinkedInOnly } = require("./poster");
 const { listDrafts, saveDraft, deleteDraft } = require("./drafts");
 
 const app = express();
@@ -75,7 +75,7 @@ app.post("/api/open-sessions", async (_req, res) => {
     const context = await openSessions();
     res.json({
       success: true,
-      message: "Browser opened. Log into X and LinkedIn once, then close the browser windows when finished."
+      message: "Browser opened. Log into X and LinkedIn once in the Playwright window, then close the browser when login is finished."
     });
 
     setTimeout(async () => {
@@ -86,7 +86,7 @@ app.post("/api/open-sessions", async (_req, res) => {
   }
 });
 
-app.post("/api/post", async (req, res) => {
+app.post("/api/prepare", async (req, res) => {
   try {
     const { linkedinText, xText } = req.body || {};
 
@@ -94,7 +94,37 @@ app.post("/api/post", async (req, res) => {
       return res.status(400).json({ error: "Both LinkedIn and X text are required." });
     }
 
-    const result = await postEverywhere({ linkedinText, xText: clampXText(xText) });
+    const result = await prepareEverywhere({ linkedinText, xText: clampXText(xText) });
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/prepare-x", async (req, res) => {
+  try {
+    const { xText } = req.body || {};
+
+    if (!xText) {
+      return res.status(400).json({ error: "X text is required." });
+    }
+
+    const result = await prepareXOnly({ xText: clampXText(xText) });
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+});
+
+app.post("/api/prepare-linkedin", async (req, res) => {
+  try {
+    const { linkedinText } = req.body || {};
+
+    if (!linkedinText) {
+      return res.status(400).json({ error: "LinkedIn text is required." });
+    }
+
+    const result = await prepareLinkedInOnly({ linkedinText: cleanInput(linkedinText) });
     res.json(result);
   } catch (error) {
     res.status(500).json({ error: error.message });

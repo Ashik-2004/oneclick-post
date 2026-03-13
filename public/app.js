@@ -12,8 +12,7 @@ const xCount = document.getElementById("xCount");
 const xCounterInline = document.getElementById("xCounterInline");
 const hooksList = document.getElementById("hooksList");
 const draftsList = document.getElementById("draftsList");
-const quickOpenButton = document.getElementById("quickOpenButton");
-const copyLinkedInButton = document.getElementById("copyLinkedInButton");
+const postButton = document.getElementById("postButton");
 const saveDraftButton = document.getElementById("saveDraftButton");
 const refreshDraftsButton = document.getElementById("refreshDraftsButton");
 const toneChips = Array.from(document.querySelectorAll(".tone-chip"));
@@ -121,7 +120,7 @@ function updateXCount() {
 
 function setBusy(isBusy) {
   document.body.classList.toggle("is-busy", isBusy);
-  [quickOpenButton, copyLinkedInButton, saveDraftButton, refreshDraftsButton, ...toneChips].forEach((button) => {
+  [postButton, saveDraftButton, refreshDraftsButton, ...toneChips].forEach((button) => {
     if (button) {
       button.disabled = isBusy;
     }
@@ -280,6 +279,39 @@ function scheduleAutoGenerate() {
   }, 500);
 }
 
+async function ensureDraftsReady() {
+  await autoGenerate();
+  const finalX = cleanInput(xPreview.value);
+  const finalLinkedIn = cleanInput(linkedinPreview.value);
+  if (!finalX && !finalLinkedIn) {
+    throw new Error("Type a topic or paste content first.");
+  }
+  return { finalX, finalLinkedIn };
+}
+
+async function postInBrowser() {
+  setBusy(true);
+  setStatus("Opening X and LinkedIn in your browser...");
+  try {
+    const { finalX, finalLinkedIn } = await ensureDraftsReady();
+    const xTab = window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(finalX)}`, "_blank", "noopener");
+    const linkedinTab = window.open("https://www.linkedin.com/feed/", "_blank", "noopener");
+
+    if (!xTab || !linkedinTab) {
+      throw new Error("Allow popups for localhost:3000, then click Post again.");
+    }
+
+    await navigator.clipboard.writeText(finalLinkedIn).catch(() => {});
+    setStatus("X opened with ready content. LinkedIn opened and the LinkedIn post text was copied to your clipboard for paste.");
+    showToast("Browser tabs opened");
+  } catch (error) {
+    setStatus(error.message);
+    showToast(error.message);
+  } finally {
+    setBusy(false);
+  }
+}
+
 async function saveDraft() {
   setBusy(true);
   setStatus("Saving your draft locally...");
@@ -307,31 +339,6 @@ async function saveDraft() {
   } finally {
     setBusy(false);
   }
-}
-
-async function copyLinkedIn() {
-  const text = cleanInput(linkedinPreview.value);
-  if (!text) {
-    setStatus("No LinkedIn text yet. Type a topic first.");
-    return;
-  }
-  await navigator.clipboard.writeText(text).catch(() => {});
-  setStatus("LinkedIn text copied.");
-  showToast("LinkedIn copied");
-}
-
-async function openBrowserAssist() {
-  await autoGenerate();
-  const finalX = cleanInput(xPreview.value);
-  const finalLinkedIn = cleanInput(linkedinPreview.value);
-  if (!finalX || !finalLinkedIn) {
-    throw new Error("Type a topic or paste content first.");
-  }
-  await navigator.clipboard.writeText(finalLinkedIn).catch(() => {});
-  window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(finalX)}`, "_blank", "noopener");
-  window.open("https://www.linkedin.com/feed/", "_blank", "noopener");
-  setStatus("X opened with your post. LinkedIn opened and the LinkedIn text was copied to your clipboard.");
-  showToast("X and LinkedIn opened");
 }
 
 async function deleteDraftById(id) {
@@ -365,15 +372,7 @@ async function hydrateDashboard() {
   });
 }
 
-quickOpenButton.addEventListener("click", async () => {
-  try {
-    await openBrowserAssist();
-  } catch (error) {
-    setStatus(error.message);
-    showToast(error.message);
-  }
-});
-copyLinkedInButton.addEventListener("click", copyLinkedIn);
+postButton.addEventListener("click", postInBrowser);
 saveDraftButton.addEventListener("click", saveDraft);
 refreshDraftsButton.addEventListener("click", async () => {
   setBusy(true);
